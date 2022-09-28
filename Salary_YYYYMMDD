@@ -1,1 +1,45 @@
-
+with salary as (
+    select distinct spriden_id "Personnel_Identifier",
+    'SFASU' "Corporation_Code_Type_Code",
+    'Stephen F. Austin State University' "Corporation_Code_Type_Name",
+    nbrjobs_orgn_code_ts "Org_Unit_Code",
+    '' "Salary_Number",
+    nbrjobs_effective_date "Start_Date",
+    nbrbjob_end_date "End_Date",
+    '' "Actual_Salary",
+    '' "Approved_Salary",
+    nbrjobs_fte*40 "Hours_Worked",
+    '' "Earning_Type_Code",
+    '' "Earning_Type_Name",
+    '' "Step_Type_Code",
+    '' "Step_Type_Name",
+    '' "Comment",
+    '' "Benefits_Package_Code",
+    '' "Benefits_Package_Name",
+    'S' "Pay_Type_Code",
+    (case when nbrjobs_ecls_code like 'H%'
+        or nbrjobs_ecls_code in ('R3','R4')
+        then 'BW'
+        when nbrjobs_ecls_code like 'E%'
+        or nbrjobs_ecls_code like 'F%'
+        or nbrjobs_ecls_code like 'N%'
+        or nbrjobs_ecls_code like 'P%'
+        or nbrjobs_ecls_code like 'S%'
+        or nbrjobs_ecls_code in ('R1','R2','R5','R6')
+        and nbrjobs_ecls_code <> 'E3'
+        then 'M' end) "Person_Pay_Period_Type_Code"
+from spriden
+inner join nbrjobs
+    on nbrjobs_pidm = spriden_pidm
+    and nbrjobs_effective_date <= sysdate
+    and nbrjobs_status <> 'T'
+    and nbrjobs_fte > 0
+    and nbrjobs_ecls_code not like 'S%'
+inner join nbrbjob
+    on nbrbjob_pidm = nbrjobs_pidm
+    and nbrbjob_posn = nbrjobs_posn
+    and (nbrbjob_end_date is null
+        or nbrbjob_end_date > sysdate)
+where spriden_change_ind is null
+)
+select distinct * from salary;
