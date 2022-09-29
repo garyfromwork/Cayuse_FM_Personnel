@@ -1,9 +1,8 @@
-with salary as (
     select distinct spriden_id "Personnel_Identifier",
     'SFASU' "Corporation_Code_Type_Code",
     'Stephen F. Austin State University' "Corporation_Code_Type_Name",
     nbrjobs_orgn_code_ts "Org_Unit_Code",
-    '' "Salary_Number",
+    SFADATA.F_CAYUSE_SALARY_NUM(SPRIDEN_ID,NBRJOBS_PIDM, NBRJOBS_POSN, NBRJOBS_EFFECTIVE_DATE, NBRJOBS_FTE) "Salary_Number",
     nbrjobs_effective_date "Start_Date",
     nbrbjob_end_date "End_Date",
     '' "Actual_Salary",
@@ -40,102 +39,6 @@ inner join nbrbjob
     and nbrbjob_posn = nbrjobs_posn
     and (nbrbjob_end_date is null
         or nbrbjob_end_date > sysdate)
+    AND NBRBJOB_BEGIN_DATE = NBRJOBS_EFFECTIVE_DATE
 where spriden_change_ind is null
-),
-salary_1 as (
-    select distinct
-    "Personnel_Identifier",
-    "Corporation_Code_Type_Code",
-    "Corporation_Code_Type_Name",
-    "Org_Unit_Code",
-    substr("Start_Date", -2) || '01' "Salary_Number",
-    "Start_Date",
-    "End_Date",
-    "Actual_Salary",
-    "Approved_Salary",
-    "Hours_Worked",
-    "Earning_Type_Code",
-    "Earning_Type_Name",
-    "Step_Type_Code",
-    "Step_Type_Name",
-    "Comment",
-    "Benefits_Package_Code",
-    "Benefits_Package_Name",
-    "Pay_Type_Code",
-    "Person_Pay_Period_Type_Code"
-    from salary
-    where "Start_Date" = (select min(b."Start_Date")
-                                from salary b
-                                where b."Personnel_Identifier" = salary."Personnel_Identifier")
-), salary_2 as (
-    select distinct
-    "Personnel_Identifier",
-    "Corporation_Code_Type_Code",
-    "Corporation_Code_Type_Name",
-    "Org_Unit_Code",
-    substr("Start_Date", -2) || '02' "Salary_Number",
-    "Start_Date",
-    "End_Date",
-    "Actual_Salary",
-    "Approved_Salary",
-    "Hours_Worked",
-    "Earning_Type_Code",
-    "Earning_Type_Name",
-    "Step_Type_Code",
-    "Step_Type_Name",
-    "Comment",
-    "Benefits_Package_Code",
-    "Benefits_Package_Name",
-    "Pay_Type_Code",
-    "Person_Pay_Period_Type_Code"
-    from salary
-    where "Personnel_Identifier" || "Start_Date" not in (select a."Personnel_Identifier" || a."Start_Date"
-                                                                from salary_1 a)
-    and "Start_Date" = (select min(b."Start_Date")
-                                from salary b
-                                where b."Personnel_Identifier" = salary."Personnel_Identifier"
-                                and b."Start_Date" <> (select min(b."Start_Date")
-                                                        from salary b)
-                        )
-),
-salary_3 as (
-    select distinct
-    "Personnel_Identifier",
-    "Corporation_Code_Type_Code",
-    "Corporation_Code_Type_Name",
-    "Org_Unit_Code",
-    substr("Start_Date", -2) || '03' "Salary_Number",
-    "Start_Date",
-    "End_Date",
-    "Actual_Salary",
-    "Approved_Salary",
-    "Hours_Worked",
-    "Earning_Type_Code",
-    "Earning_Type_Name",
-    "Step_Type_Code",
-    "Step_Type_Name",
-    "Comment",
-    "Benefits_Package_Code",
-    "Benefits_Package_Name",
-    "Pay_Type_Code",
-    "Person_Pay_Period_Type_Code"
-    from salary
-    where "Personnel_Identifier" || "Start_Date" not in (select a."Personnel_Identifier" || a."Start_Date"
-                                                                from salary_1 a)
-    and "Personnel_Identifier" || "Start_Date" not in (select a."Personnel_Identifier" || a."Start_Date"
-                                                                from salary_2 a)
-    and "Start_Date" = (select min(b."Start_Date")
-                                from salary b
-                                where b."Personnel_Identifier" = salary."Personnel_Identifier"
-                                and b."Start_Date" <> (select min(b."Start_Date")
-                                                        from salary b)
-                        )
-)
-select distinct *
-from salary_1
-union
-select distinct *
-from salary_2
-union
-select distinct *
-from salary_3;
+ORDER BY spriden_id asc, SFADATA.F_CAYUSE_SALARY_NUM(SPRIDEN_ID,NBRJOBS_PIDM, NBRJOBS_POSN, NBRJOBS_EFFECTIVE_DATE, NBRJOBS_FTE) asc;
