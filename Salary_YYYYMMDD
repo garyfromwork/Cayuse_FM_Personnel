@@ -1,3 +1,216 @@
+ WITH primary_posns AS (
+    SELECT
+        Z.*,
+        NBRBJOB.*,
+        C.*,
+        A.*
+    FROM
+        spriden z,
+        nbrbjob,
+        pebempl c,
+        nbrjobs a
+    WHERE
+        a.nbrjobs_pidm = spriden_pidm
+        AND a.nbrjobs_pidm = pebempl_pidm
+        AND a.nbrjobs_pidm = nbrbjob_pidm
+        AND PEBEMPL_INTERNAL_FT_PT_IND <> 'P'
+        AND PEBEMPL_EMPL_STATUS <> 'T'
+        AND NBRBJOB_CONTRACT_TYPE = 'P'
+        AND NBRJOBS_ECLS_CODE <> 'R0'
+        AND NBRJOBS_ORGN_CODE_TS NOT IN ('11001','11021','20023','20026','22129','22226','24209',
+            '25008','25914','26050','26414','26510','29002','29003','29007','29011','29012',
+            '29013','29304','29310','29311','30204','30205','30206','30209','30210','30212',
+            '30232','30249','30251','30254','30257','30258','30501','30601','40017','52002',
+            '52005','52006','52109','52201','52302','52303','53110','53701','54011','80010',
+            '90011','90012','90016','95102','95113','95401','95601','96021','96031','96041',
+            '96051','96061','97021','97031','97041','97051','97061','97071','97081','97091','97101')
+        AND a.nbrjobs_status <> 'T'
+        AND nbrbjob_posn = a.nbrjobs_posn
+        AND nbrbjob_suff = a.nbrjobs_suff
+        AND a.nbrjobs_effective_date =(
+            SELECT
+                MAX(nbrjobs_effective_date)
+            FROM
+                nbrjobs
+            WHERE
+                nbrjobs_pidm = a.nbrjobs_pidm
+                AND nbrjobs_posn = a.nbrjobs_posn
+                AND nbrjobs_suff = a.nbrjobs_suff
+                AND nbrjobs_effective_date <= sysdate
+        ) --AND pebempl_empl_status <> 'T'
+        AND pebempl_ecls_code NOT IN(
+            'R0',
+            'S1',
+            'S2',
+            'S3'
+        )
+        AND spriden_pidm IN(
+            SELECT
+                DISTINCT pebempl_pidm
+            FROM
+                pebempl
+            WHERE
+                --pebempl_empl_status <> 'T'
+                (
+                    pebempl_trea_code IS NULL
+                    OR(
+                        pebempl_trea_code IS NOT NULL
+                        AND pebempl_term_date > sysdate
+                    )
+                )
+                AND NOT EXISTS(
+                    SELECT
+                        1
+                    FROM
+                        spriden
+                    WHERE
+                        spriden_pidm = pebempl_pidm
+                        AND spriden_change_ind IS NULL
+                        AND lower(spriden_last_name) LIKE 'xxx%'
+                )
+        )
+        AND spriden_change_ind IS NULL
+        AND nbrbjob_begin_date <= sysdate
+        AND(
+            nbrbjob_end_date IS NULL
+            OR(
+                nbrbjob_end_date IS NOT NULL
+                AND nbrbjob_end_date > sysdate
+            )
+        )
+    ORDER BY
+        spriden_last_name,
+        spriden_mi,
+        spriden_first_name ASC
+),
+secondary_posns AS (
+    SELECT
+        Z.*,
+        NBRBJOB.*,
+        C.*,
+        A.*
+    FROM
+        spriden z,
+        nbrbjob,
+        pebempl c,
+        nbrjobs a
+    WHERE
+        a.nbrjobs_pidm = spriden_pidm
+        AND a.nbrjobs_pidm = pebempl_pidm
+        AND a.nbrjobs_pidm = nbrbjob_pidm
+        AND PEBEMPL_INTERNAL_FT_PT_IND <> 'P'
+        AND PEBEMPL_EMPL_STATUS <> 'T'
+        AND NBRBJOB_CONTRACT_TYPE = 'S'
+        AND NBRJOBS_ECLS_CODE <> 'R0'
+        AND NBRJOBS_ORGN_CODE_TS NOT IN ('11001','11021','20023','20026','22129','22226','24209',
+            '25008','25914','26050','26414','26510','29002','29003','29007','29011','29012',
+            '29013','29304','29310','29311','30204','30205','30206','30209','30210','30212',
+            '30232','30249','30251','30254','30257','30258','30501','30601','40017','52002',
+            '52005','52006','52109','52201','52302','52303','53110','53701','54011','80010',
+            '90011','90012','90016','95102','95113','95401','95601','96021','96031','96041',
+            '96051','96061','97021','97031','97041','97051','97061','97071','97081','97091','97101')
+        AND a.nbrjobs_status <> 'T'
+        AND nbrbjob_posn = a.nbrjobs_posn
+        AND nbrbjob_suff = a.nbrjobs_suff
+        AND a.nbrjobs_effective_date =(
+            SELECT
+                MAX(nbrjobs_effective_date)
+            FROM
+                nbrjobs
+            WHERE
+                nbrjobs_pidm = a.nbrjobs_pidm
+                AND nbrjobs_posn = a.nbrjobs_posn
+                AND nbrjobs_suff = a.nbrjobs_suff
+                AND nbrjobs_effective_date <= sysdate
+        ) --AND pebempl_empl_status <> 'T'
+        AND pebempl_ecls_code NOT IN(
+            'R0',
+            'S1',
+            'S2',
+            'S3'
+        )
+        AND spriden_pidm IN(
+            SELECT
+                DISTINCT pebempl_pidm
+            FROM
+                pebempl
+            WHERE
+                --pebempl_empl_status <> 'T'
+                (
+                    pebempl_trea_code IS NULL
+                    OR(
+                        pebempl_trea_code IS NOT NULL
+                        AND pebempl_term_date > sysdate
+                    )
+                )
+                AND NOT EXISTS(
+                    SELECT
+                        1
+                    FROM
+                        spriden
+                    WHERE
+                        spriden_pidm = pebempl_pidm
+                        AND spriden_change_ind IS NULL
+                        AND lower(spriden_last_name) LIKE 'xxx%'
+                )
+        )
+        AND spriden_change_ind IS NULL
+        AND nbrbjob_begin_date <= sysdate
+        AND(
+            nbrbjob_end_date IS NULL
+            OR(
+                nbrbjob_end_date IS NOT NULL
+                AND nbrbjob_end_date > sysdate
+            )
+        )
+    ORDER BY
+        spriden_last_name,
+        spriden_mi,
+        spriden_first_name ASC
+),
+PEOPLE AS (
+	SELECT *
+	FROM PRIMARY_POSNS
+    WHERE PRIMARY_POSNS.NBRJOBS_STATUS = 'A'
+    AND PRIMARY_POSNS.NBRJOBS_EFFECTIVE_DATE <= SYSDATE
+	AND PRIMARY_POSNS.NBRJOBS_EFFECTIVE_DATE = 
+        (SELECT MAX(B.NBRJOBS_EFFECTIVE_DATE) 
+            FROM NBRJOBS B
+            WHERE B.NBRJOBS_PIDM = PRIMARY_POSNS.NBRJOBS_PIDM 
+            AND B.NBRJOBS_SUFF = PRIMARY_POSNS.NBRJOBS_SUFF 
+            AND B.NBRJOBS_POSN = PRIMARY_POSNS.NBRJOBS_POSN
+            AND B.NBRJOBS_STATUS = 'A'
+        )
+),
+SECONDARY_PEOPLE AS (
+    SELECT *
+	FROM SECONDARY_POSNS
+    WHERE SECONDARY_POSNS.NBRJOBS_STATUS = 'A'
+    AND SECONDARY_POSNS.NBRJOBS_EFFECTIVE_DATE <= SYSDATE
+	AND SECONDARY_POSNS.NBRJOBS_EFFECTIVE_DATE = 
+        (SELECT MAX(B.NBRJOBS_EFFECTIVE_DATE) 
+            FROM NBRJOBS B
+            WHERE B.NBRJOBS_PIDM = SECONDARY_POSNS.NBRJOBS_PIDM 
+            AND B.NBRJOBS_SUFF = SECONDARY_POSNS.NBRJOBS_SUFF 
+            AND B.NBRJOBS_POSN = SECONDARY_POSNS.NBRJOBS_POSN
+            AND B.NBRJOBS_STATUS = 'A'
+        )
+),
+RACES AS (
+    SELECT GORPRAC_PIDM,
+        LISTAGG((CASE GORPRAC_RACE_CDE WHEN '4' THEN 'AMERICAN_INDIAN_ALASKA_NATIVE'
+                WHEN '5' THEN 'ASIAN'
+                WHEN '6' THEN 'BLACK_AFRICAN_AMERICAN'
+                WHEN '7' THEN 'NATIVE_HAWAIIAN_PACIFIC_ISLANDER'
+                WHEN '8' THEN 'WHITE'
+                ELSE ' ' END), ' ')
+        WITHIN GROUP (
+            ORDER BY GORPRAC_RACE_CDE
+        ) AS RACE
+    FROM GORPRAC
+    GROUP BY GORPRAC_PIDM
+    ORDER BY GORPRAC_PIDM
+)
     select distinct spriden_id "Personnel_Identifier",
     'SFASU' "Corporation_Code_Type_Code",
     'Stephen F. Austin State University' "Corporation_Code_Type_Name",
@@ -46,4 +259,55 @@ inner join nbrbjob
         or nbrbjob_end_date > sysdate)
     AND NBRBJOB_BEGIN_DATE = NBRJOBS_EFFECTIVE_DATE
 where spriden_change_ind is null
-ORDER BY spriden_id asc, SFADATA.F_CAYUSE_SALARY_NUM(SPRIDEN_ID,NBRJOBS_PIDM, NBRJOBS_POSN, NBRJOBS_EFFECTIVE_DATE, NBRJOBS_FTE) asc;
+and spriden_id in (select PEOPLE.SPRIDEN_ID from people)
+union
+    select distinct spriden_id "Personnel_Identifier",
+    'SFASU' "Corporation_Code_Type_Code",
+    'Stephen F. Austin State University' "Corporation_Code_Type_Name",
+    nbrjobs_orgn_code_ts "Org_Unit_Code",
+    SFADATA.F_CAYUSE_SALARY_NUM(SPRIDEN_ID,NBRJOBS_PIDM, NBRJOBS_POSN, NBRJOBS_EFFECTIVE_DATE, NBRJOBS_FTE) "Salary_Number",
+    nbrjobs_effective_date "Start_Date",
+    nbrbjob_end_date "End_Date",
+    (CASE WHEN NBRJOBS_POSN LIKE 'E%' OR NBRJOBS_POSN LIKE 'H%' OR NBRJOBS_POSN LIKE 'N%' THEN TO_CHAR(NBRJOBS_ANN_SALARY)
+          WHEN NBRJOBS_POSN LIKE 'F%' THEN TO_CHAR(NBRJOBS_ANN_SALARY)
+          WHEN NBRJOBS_POSN LIKE 'P%' THEN TO_CHAR(NBRJOBS_ANN_SALARY*3)
+          WHEN NBRJOBS_ANN_SALARY = 0 THEN TO_CHAR(NBRJOBS_HRS_PAY*(NBRJOBS_FTE*40)*12) END
+    )  "Actual_Salary",
+    '' "Approved_Salary",
+    nbrjobs_fte*40 "Hours_Worked",
+    '' "Earning_Type_Code",
+    '' "Earning_Type_Name",
+    '' "Step_Type_Code",
+    '' "Step_Type_Name",
+    '' "Comment",
+    '' "Benefits_Package_Code",
+    '' "Benefits_Package_Name",
+    'S' "Pay_Type_Code",
+    (case when nbrjobs_ecls_code like 'H%'
+        or nbrjobs_ecls_code in ('R3','R4')
+        then 'BW'
+        when nbrjobs_ecls_code like 'E%'
+        or nbrjobs_ecls_code like 'F%'
+        or nbrjobs_ecls_code like 'N%'
+        or nbrjobs_ecls_code like 'P%'
+        or nbrjobs_ecls_code like 'S%'
+        or nbrjobs_ecls_code in ('R1','R2','R5','R6')
+        and nbrjobs_ecls_code <> 'E3'
+        then 'M' end) "Person_Pay_Period_Type_Code"
+from spriden
+inner join nbrjobs
+    on nbrjobs_pidm = spriden_pidm
+    and nbrjobs_effective_date <= sysdate
+    and nbrjobs_status = 'A'
+    and nbrjobs_fte > 0
+    and nbrjobs_ecls_code not like 'S%'
+inner join nbrbjob
+    on nbrbjob_pidm = nbrjobs_pidm
+    and nbrbjob_posn = nbrjobs_posn
+    and nbrbjob_suff = nbrjobs_suff
+    and (nbrbjob_end_date is null
+        or nbrbjob_end_date > sysdate)
+    AND NBRBJOB_BEGIN_DATE = NBRJOBS_EFFECTIVE_DATE
+where spriden_change_ind is null
+and spriden_id in (select SECONDARY_PEOPLE.SPRIDEN_ID from secondary_people);
+--ORDER BY spriden_id asc, SFADATA.F_CAYUSE_SALARY_NUM(SPRIDEN_ID,NBRJOBS_PIDM, NBRJOBS_POSN, NBRJOBS_EFFECTIVE_DATE, NBRJOBS_FTE) asc;
