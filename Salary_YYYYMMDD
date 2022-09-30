@@ -5,7 +5,11 @@
     SFADATA.F_CAYUSE_SALARY_NUM(SPRIDEN_ID,NBRJOBS_PIDM, NBRJOBS_POSN, NBRJOBS_EFFECTIVE_DATE, NBRJOBS_FTE) "Salary_Number",
     nbrjobs_effective_date "Start_Date",
     nbrbjob_end_date "End_Date",
-    '' "Actual_Salary",
+    (CASE WHEN NBRJOBS_POSN LIKE 'E%' OR NBRJOBS_POSN LIKE 'H%' OR NBRJOBS_POSN LIKE 'N%' THEN TO_CHAR(NBRJOBS_ANN_SALARY)
+          WHEN NBRJOBS_POSN LIKE 'F%' THEN TO_CHAR(NBRJOBS_ANN_SALARY)
+          WHEN NBRJOBS_POSN LIKE 'P%' THEN TO_CHAR(NBRJOBS_ANN_SALARY*3)
+          WHEN NBRJOBS_ANN_SALARY = 0 THEN TO_CHAR(NBRJOBS_HRS_PAY*(NBRJOBS_FTE*40)*12) END
+    )  "Actual_Salary",
     '' "Approved_Salary",
     nbrjobs_fte*40 "Hours_Worked",
     '' "Earning_Type_Code",
@@ -31,12 +35,13 @@ from spriden
 inner join nbrjobs
     on nbrjobs_pidm = spriden_pidm
     and nbrjobs_effective_date <= sysdate
-    and nbrjobs_status <> 'T'
+    and nbrjobs_status = 'A'
     and nbrjobs_fte > 0
     and nbrjobs_ecls_code not like 'S%'
 inner join nbrbjob
     on nbrbjob_pidm = nbrjobs_pidm
     and nbrbjob_posn = nbrjobs_posn
+    and nbrbjob_suff = nbrjobs_suff
     and (nbrbjob_end_date is null
         or nbrbjob_end_date > sysdate)
     AND NBRBJOB_BEGIN_DATE = NBRJOBS_EFFECTIVE_DATE
