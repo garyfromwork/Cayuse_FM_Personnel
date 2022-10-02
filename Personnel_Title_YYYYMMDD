@@ -210,7 +210,7 @@ RACES AS (
     FROM GORPRAC
     GROUP BY GORPRAC_PIDM
     ORDER BY GORPRAC_PIDM
-)
+), PERSONNEL AS (
 SELECT
     PEOPLE.SPRIDEN_ID Personnel_Identifier,
     (case when (nbrjobs_orgn_code_ts in ('20','200','2000','20001')
@@ -290,7 +290,7 @@ SELECT
           when NBRJOBS_FTE >= 1 then 'FT'
           else null end) Full_Part_Type_ID,
     NBRJOBS_FTE FTE,
-    '' Position_Number
+    (NBRJOBS_POSN || ' - ' || NBRJOBS_DESC) Position_Number
 FROM PEOPLE
 UNION
 SELECT
@@ -372,5 +372,9 @@ SELECT
           when NBRJOBS_FTE >= 1 then 'FT'
           else null end) Full_Part_Type_ID,
     NBRJOBS_FTE FTE,
-    '' Position_Number
-FROM SECONDARY_PEOPLE;
+    (NBRJOBS_POSN || ' - ' || NBRJOBS_DESC) Position_Number
+FROM SECONDARY_PEOPLE
+)
+SELECT *
+FROM PERSONNEL
+WHERE PERSONNEL_TYPE_CODE IS NOT NULL;
