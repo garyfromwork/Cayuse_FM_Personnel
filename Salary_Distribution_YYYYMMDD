@@ -284,8 +284,12 @@ select distinct
     (select Flex1_code 
         from flex1
         where Flex1_code = nbrjlbd_orgn_code) "Cost_Share_Fund",
-    '' "Rate",
-    '' "Percent"
+    (CASE WHEN NBRJOBS_POSN LIKE 'E%' OR NBRJOBS_POSN LIKE 'H%' OR NBRJOBS_POSN LIKE 'N%' THEN TO_CHAR(NBRJOBS_ANN_SALARY)
+          WHEN NBRJOBS_POSN LIKE 'F%' THEN TO_CHAR(NBRJOBS_ANN_SALARY)
+          WHEN NBRJOBS_POSN LIKE 'P%' THEN TO_CHAR(NBRJOBS_ANN_SALARY*3)
+          WHEN NBRJOBS_ANN_SALARY = 0 THEN TO_CHAR(NBRJOBS_HRS_PAY*(NBRJOBS_FTE*40)*12) END
+    ) "Rate",
+    nbrjlbd_percent "Percent"
 from spriden
 inner join nbrjobs
     on nbrjobs_pidm = spriden_pidm
