@@ -262,8 +262,9 @@ SELECT
                               'N2', 'S',
                               'E3', 'V', NULL
     )end) Personnel_Type_Code,
-    NBRJOBS_POSN Person_Title_Code,
-    NBRJOBS_DESC Person_Title_Name,
+    NBRJOBS_ECLS_CODE Person_Title_Code,
+    (select ptrecls_long_desc from ptrecls
+        where ptrecls_code = NBRJOBS_ECLS_CODE) Person_Title_Name,
     '' Title_Description,
     NBRJOBS_EFFECTIVE_DATE Start_Date,
     '' Scheduled_End_Date,
@@ -344,8 +345,9 @@ SELECT
                               'N2', 'S',
                               'E3', 'V', NULL
     )end) Personnel_Type_Code,
-    NBRJOBS_POSN Person_Title_Code,
-    NBRJOBS_DESC Person_Title_Name,
+    NBRJOBS_ECLS_CODE Person_Title_Code,
+    (select ptrecls_long_desc from ptrecls
+        where ptrecls_code = NBRJOBS_ECLS_CODE) Person_Title_Name,
     '' Title_Description,
     NBRJOBS_EFFECTIVE_DATE Start_Date,
     '' Scheduled_End_Date,
