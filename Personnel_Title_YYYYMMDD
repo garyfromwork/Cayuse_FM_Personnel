@@ -369,8 +369,8 @@ SELECT
         THEN '3'
         END) Appointment_Length,
     (case when nbrjobs_posn like 'HC%' then 'T'
-        when nbrjobs_posn like 'E%' and lower(nbrjobs_posn) like '%temp%' then 'T'
-        when nbrjobs_posn like 'H%'and lower(nbrjobs_posn) like '%temp%' then 'T'
+        when nbrjobs_posn like 'E%' and lower(nbrjobs_desc) like '%temp%' then 'T'
+        when nbrjobs_posn like 'H%' and lower(nbrjobs_desc) like '%temp%' then 'T'
         else 'P' end) Perm_Temp_Type_ID,
     (case when NBRJOBS_FTE < 1 THEN 'PT'
           when NBRJOBS_FTE >= 1 then 'FT'
