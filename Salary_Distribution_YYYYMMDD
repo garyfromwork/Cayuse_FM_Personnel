@@ -309,7 +309,10 @@ INNER JOIN NBRJLBD
     AND NBRJLBD_POSN = NBRJOBS_POSN
     AND NBRJLBD_SUFF = NBRJOBS_SUFF
     AND NBRJLBD_EFFECTIVE_DATE = NBRJOBS_EFFECTIVE_DATE
-where spriden_change_ind is null)
+where spriden_change_ind is null
+and (lower(spriden_first_name) not like 'xxx%'
+    or lower(spriden_last_name) not like 'xxx%')
+)
 select *
 from salary_distribution
 where "Cost_Center_Code" is not null;
