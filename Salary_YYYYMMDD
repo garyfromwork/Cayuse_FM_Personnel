@@ -230,8 +230,8 @@ RACES AS (
     '' "Step_Type_Code",
     '' "Step_Type_Name",
     '' "Comment",
-    '' "Benefits_Package_Code",
-    '' "Benefits_Package_Name",
+    nbrjobs_ecls_code "Benefits_Package_Code",
+    (select ptrecls_long_desc from ptrecls where ptrecls_code = nbrjobs_ecls_code) "Benefits_Package_Name",
     'S' "Pay_Type_Code",
     (case when nbrjobs_ecls_code like 'H%'
         or nbrjobs_ecls_code in ('R3','R4')
@@ -280,8 +280,8 @@ union
     '' "Step_Type_Code",
     '' "Step_Type_Name",
     '' "Comment",
-    '' "Benefits_Package_Code",
-    '' "Benefits_Package_Name",
+    nbrjobs_ecls_code "Benefits_Package_Code",
+    (select ptrecls_long_desc from ptrecls where ptrecls_code = nbrjobs_ecls_code) "Benefits_Package_Name",
     'S' "Pay_Type_Code",
     (case when nbrjobs_ecls_code like 'H%'
         or nbrjobs_ecls_code in ('R3','R4')
