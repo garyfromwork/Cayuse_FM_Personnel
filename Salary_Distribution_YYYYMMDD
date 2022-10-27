@@ -65,10 +65,10 @@ final_multiyear_grants as (
         a.ftvfund_grnt_code,
         a.ftvfund_title,
         a.ftvfund_status_ind,
-        max(a.ftvfund_nchg_date) as "max_nchg_date",
-        max(a.ftvfund_eff_date) as "max_eff_date",
-        max(a.ftvfund_term_date) as "max_term_date",
-        max(a.ftvfund_expend_end_date) as "max_end_date"
+        max(a.ftvfund_nchg_date) max_nchg_date,
+        max(a.ftvfund_eff_date) max_eff_date,
+        max(a.ftvfund_term_date) max_term_date,
+        max(a.ftvfund_expend_end_date) max_end_date
     from ftvfund a
     left join ftvfund b
         on b.ftvfund_fund_code = a.ftvfund_fund_code
@@ -219,10 +219,10 @@ all_funds as (
     on b.ftvfund_fund_code = a.ftvfund_fund_code
         and b.ftvfund_grnt_code = a.ftvfund_grnt_code
         and b.ftvfund_status_ind = a.ftvfund_status_ind
-        and b.ftvfund_nchg_date = a."max_nchg_date"
-        and b.ftvfund_eff_date = a."max_eff_date"
-        and b.ftvfund_term_date = a."max_term_date"
-        and b.ftvfund_expend_end_date = a."max_end_date"
+        and b.ftvfund_nchg_date = a.max_nchg_date
+        and b.ftvfund_eff_date = a.max_eff_date
+        and b.ftvfund_term_date = a.max_term_date
+        and b.ftvfund_expend_end_date = a.max_end_date
     left join frbgrnt
         on frbgrnt_code = a.ftvfund_grnt_code
     left join frvfund
@@ -265,37 +265,39 @@ order by flex1_code asc
 ),
 salary_distribution as (
 select distinct 
-    spriden_id  "Personnel_Identifier",
-    SFADATA.F_CAYUSE_SALARY_NUM(SPRIDEN_ID,NBRJOBS_PIDM, NBRJOBS_POSN, NBRJOBS_EFFECTIVE_DATE, NBRJOBS_FTE) "Salary_Number",
-    NBRJLBD_ORGN_CODE "Org_Unit_Code",
-    NBRJOBS_EFFECTIVE_DATE "Start_Date",
-    NBRBJOB_END_DATE "End_Date",
-    NBRJLBD_FUND_CODE "Fund_Code",
-    NBRJLBD_ACCT_CODE "Object_Code",
-    'SFASU' "Object_Set_Code",
+    spriden_id  Personnel_Identifier,
+    SFADATA.F_CAYUSE_SALARY_NUM(SPRIDEN_ID,NBRJOBS_PIDM, NBRJOBS_POSN, NBRJOBS_EFFECTIVE_DATE, NBRJOBS_FTE) Salary_Number,
+    NBRJLBD_ORGN_CODE Org_Unit_Code,
+    NBRJOBS_EFFECTIVE_DATE Start_Date,
+    NBRBJOB_END_DATE End_Date,
+    NBRJLBD_FUND_CODE Fund_Code,
+    NBRJLBD_ACCT_CODE Object_Code,
+    'SFASU' Object_Set_Code,
     ( SELECT DISTINCT frbgrnt_code
         FROM ALL_FUNDS
-        WHERE NBRJLBD_FUND_CODE IN fund_code
-    ) "Cost_Center_Code",
+        WHERE NBRJLBD_FUND_CODE = fund_code
+        AND rownum = 1
+    ) Cost_Center_Code,
     ( select distinct frbgrnt_title
         from all_funds
-        where nbrjlbd_fund_code in fund_code
-    ) "Cost_Center_Name",
+        where nbrjlbd_fund_code = fund_code
+    ) Cost_Center_Name,
     (select Flex1_code 
         from flex1
-        where Flex1_code = nbrjlbd_orgn_code) "Cost_Share_Fund",
+        where Flex1_code = nbrjlbd_orgn_code) Cost_Share_Fund,
     (CASE WHEN NBRJOBS_POSN LIKE 'E%' OR NBRJOBS_POSN LIKE 'H%' OR NBRJOBS_POSN LIKE 'N%' THEN TO_CHAR(NBRJOBS_ANN_SALARY)
           WHEN NBRJOBS_POSN LIKE 'F%' THEN TO_CHAR(NBRJOBS_ANN_SALARY)
           WHEN NBRJOBS_POSN LIKE 'P%' THEN TO_CHAR(NBRJOBS_ANN_SALARY*3)
           WHEN NBRJOBS_ANN_SALARY = 0 THEN TO_CHAR(NBRJOBS_HRS_PAY*(NBRJOBS_FTE*40)*12) END
-    ) "Rate",
-    nbrjlbd_percent "Percent"
+    ) Rate,
+    nbrjlbd_percent Percent
 from spriden
 inner join nbrjobs
     on nbrjobs_pidm = spriden_pidm
     and nbrjobs_effective_date <= sysdate
     and nbrjobs_status = 'A'
     and nbrjobs_fte > 0
+    and nbrjobs_suff = '00'
     and nbrjobs_ecls_code not like 'S%'
 inner join nbrbjob
     on nbrbjob_pidm = nbrjobs_pidm
@@ -308,11 +310,10 @@ INNER JOIN NBRJLBD
     ON NBRJLBD_PIDM = SPRIDEN_PIDM
     AND NBRJLBD_POSN = NBRJOBS_POSN
     AND NBRJLBD_SUFF = NBRJOBS_SUFF
-    AND NBRJLBD_EFFECTIVE_DATE = NBRJOBS_EFFECTIVE_DATE
 where spriden_change_ind is null
 and (lower(spriden_first_name) not like 'xxx%'
     or lower(spriden_last_name) not like 'xxx%')
 )
 select *
 from salary_distribution
-where "Cost_Center_Code" is not null;
+where Cost_Center_Code is not null;
