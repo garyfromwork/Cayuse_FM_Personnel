@@ -276,7 +276,9 @@ select distinct
     ( SELECT DISTINCT frbgrnt_code
         FROM ALL_FUNDS
         WHERE NBRJLBD_FUND_CODE = fund_code
-        AND rownum = 1
+        AND GRANT_TYPE = 'Regular-Grants'
+        AND STATUS = 'A'
+--        AND rownum = 1
     ) Cost_Center_Code,
     ( select distinct frbgrnt_title
         from all_funds
