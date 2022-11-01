@@ -30,6 +30,7 @@ WITH primary_posns AS (
                 AND nbrjobs_posn = a.nbrjobs_posn
                 AND nbrjobs_suff = a.nbrjobs_suff
                 AND nbrjobs_effective_date <= sysdate
+                AND nbrjobs_status = a.nbrjobs_status
         )
         AND pebempl_ecls_code NOT IN(
             'R0',
@@ -107,6 +108,8 @@ secondary_posns AS (
                 AND nbrjobs_posn = a.nbrjobs_posn
                 AND nbrjobs_suff = a.nbrjobs_suff
                 AND nbrjobs_effective_date <= sysdate
+                AND nbrjobs_status = a.nbrjobs_status
+                
         )
         AND pebempl_ecls_code NOT IN(
             'R0',
@@ -148,6 +151,7 @@ secondary_posns AS (
                 AND nbrbjob_end_date > sysdate
             )
         )
+        AND NBRJOBS_POSN NOT IN (SELECT NBRJOBS_POSN FROM PRIMARY_POSNS WHERE NBRJOBS_PIDM = PRIMARY_POSNS.NBRJOBS_PIDM)
     ORDER BY
         spriden_last_name,
         spriden_mi,
@@ -252,7 +256,7 @@ SELECT
     NBRJOBS_ECLS_CODE Person_Title_Code,
     (select ptrecls_long_desc from ptrecls
         where ptrecls_code = NBRJOBS_ECLS_CODE) Person_Title_Name,
-    '' Title_Description,
+    NBRJOBS_DESC Title_Description,
     NBRJOBS_EFFECTIVE_DATE Start_Date,
     '' Scheduled_End_Date,
     '' End_Date,
@@ -267,6 +271,8 @@ SELECT
         THEN '12'
         WHEN NBRJOBS_POSN LIKE 'F%'
         THEN '9'
+        WHEN NBRJOBS_POSN LIKE 'SA%' OR NBRJOBS_POSN LIKE 'SG%'
+        THEN '5'
         WHEN NBRJOBS_POSN LIKE 'P%'
         THEN '3'
         END) Appointment_Length,
@@ -278,7 +284,7 @@ SELECT
           when NBRJOBS_FTE >= 1 then 'FT'
           else null end) Full_Part_Type_ID,
     NBRJOBS_FTE FTE,
-    (NBRJOBS_POSN || ' - ' || NBRJOBS_DESC) Position_Number
+    NBRJOBS_POSN Position_Number
 FROM PEOPLE
 UNION
 SELECT
@@ -335,14 +341,14 @@ SELECT
     NBRJOBS_ECLS_CODE Person_Title_Code,
     (select ptrecls_long_desc from ptrecls
         where ptrecls_code = NBRJOBS_ECLS_CODE) Person_Title_Name,
-    '' Title_Description,
+    NBRJOBS_DESC Title_Description,
     NBRJOBS_EFFECTIVE_DATE Start_Date,
     '' Scheduled_End_Date,
     '' End_Date,
     'SFASU' Corporation_Code,
     NBRJOBS_ORGN_CODE_TS Organization_Unit_Code,
-    '2' Display_Title,
-    '2' Appt_Type,
+    '0' Display_Title,
+    '0' Appt_Type,
     (CASE 
         WHEN NBRJOBS_POSN LIKE 'E%' 
             OR NBRJOBS_POSN LIKE 'H%' 
@@ -350,6 +356,8 @@ SELECT
         THEN '12'
         WHEN NBRJOBS_POSN LIKE 'F%'
         THEN '9'
+        WHEN NBRJOBS_POSN LIKE 'SA%' OR NBRJOBS_POSN LIKE 'SG%'
+        THEN '5'
         WHEN NBRJOBS_POSN LIKE 'P%'
         THEN '3'
         END) Appointment_Length,
@@ -361,7 +369,7 @@ SELECT
           when NBRJOBS_FTE >= 1 then 'FT'
           else null end) Full_Part_Type_ID,
     NBRJOBS_FTE FTE,
-    (NBRJOBS_POSN || ' - ' || NBRJOBS_DESC) Position_Number
+    NBRJOBS_POSN Position_Number
 FROM SECONDARY_PEOPLE
 )
 SELECT *
