@@ -256,7 +256,6 @@ SELECT
     NBRJOBS_ECLS_CODE Person_Title_Code,
     (select ptrecls_long_desc from ptrecls
         where ptrecls_code = NBRJOBS_ECLS_CODE) Person_Title_Name,
-    NBRJOBS_DESC Title_Description,
     NBRJOBS_EFFECTIVE_DATE Start_Date,
     '' Scheduled_End_Date,
     '' End_Date,
@@ -341,7 +340,6 @@ SELECT
     NBRJOBS_ECLS_CODE Person_Title_Code,
     (select ptrecls_long_desc from ptrecls
         where ptrecls_code = NBRJOBS_ECLS_CODE) Person_Title_Name,
-    NBRJOBS_DESC Title_Description,
     NBRJOBS_EFFECTIVE_DATE Start_Date,
     '' Scheduled_End_Date,
     '' End_Date,
