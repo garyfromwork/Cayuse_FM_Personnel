@@ -263,7 +263,7 @@ SELECT
     'SFASU' Corporation_Code,
     NBRJOBS_ORGN_CODE_TS Organization_Unit_Code,
     '1' Display_Title,
-    '1' Appt_Type,
+    NULL Appt_Type,
     (CASE 
         WHEN NBRJOBS_POSN LIKE 'E%' 
             OR NBRJOBS_POSN LIKE 'H%' 
@@ -348,7 +348,7 @@ SELECT
     'SFASU' Corporation_Code,
     NBRJOBS_ORGN_CODE_TS Organization_Unit_Code,
     '0' Display_Title,
-    '0' Appt_Type,
+    NULL Appt_Type,
     (CASE 
         WHEN NBRJOBS_POSN LIKE 'E%' 
             OR NBRJOBS_POSN LIKE 'H%' 
